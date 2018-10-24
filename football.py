@@ -72,29 +72,38 @@ def four():
 
 def five():
     waitForMotor(motorRight, motorLeft)
-    with open('/sys/class/lego-sensor/sensor3/value0') as ultraFile:
+    with open('/sys/class/lego-sensor/sensor2/value0') as ultraFile:
         ultraValue = ultraFile.read()
         if int(ultraValue) > 800:
-            time = int(ultraValue) / 900 * 1000
+            timeForRun = int(ultraValue) / 900 * 1000
             waitForMotor(motorRight, motorLeft)
-            runTimed(900, time)
+            runTimed(900, timeForRun)
         elif int(ultraValue) > 400 and int(ultraValue) < 801:
-            time = int(ultraValue) / 600 * 1000
+            timeForRun = int(ultraValue) / 600 * 1000
             waitForMotor(motorRight, motorLeft)
-            runTimed(600, time)
+            runTimed(600, timeForRun)
         elif int(ultraValue) < 401:
-            time = int(ultraValue) / 300 * 1000
+            timeForRun = int(ultraValue) / 300 * 1000
             waitForMotor(motorRight, motorLeft)
-            runTimed(300, time)
+            runTimed(300, timeForRun)
         if int(ultraValue) < 250:
-            waitForMotor(motorRight, motorLeft)
-            runTimed(-300, 1000)
-            time = (int(ultraValue) / 1050 * 1000) + 1000
-            waitForMotor(motorRight, motorLeft)
-            runTimed(1050, 1000)
+            with open('/sys/class/lego-sensor/sensor1/value0') as infraGoalFile:
+                infraGoalValue = int(infraGoalFile.readline())
+                motorRight.stop()
+                motorLeft.stop()
+                time.sleep(1)
+                #waitForMotor(motorRight, motorLeft)
+                print (infraGoalValue)
+                infraValueDef(infraGoalValue)
+                time.sleep(2)
+                waitForMotor(motorRight, motorLeft)
+                runTimed(-300, 1000)
+                timeForRun = (int(ultraValue) / 1050 * 1000) + 1500
+                waitForMotor(motorRight, motorLeft)
+                runTimed(1050, 1000)
+                time.sleep(3)
 
 
-        print (ultraValue)
 
 
 def six():
@@ -148,15 +157,15 @@ def infraValueDef(i):
 
 def main():
     i = 0
-    with open('/sys/class/lego-sensor/sensor0/mode', 'w') as infraFile:
-        infraFile.write('AC')
+    with open('/sys/class/lego-sensor/sensor0/mode', 'w') as infraBallFile:
+        infraBallFile.write('AC')
     print(infra.mode)
     while 1:
-        with open('/sys/class/lego-sensor/sensor0/value0') as infraFile:
+        with open('/sys/class/lego-sensor/sensor0/value0') as infraBallFile:
             waitForMotor(motorRight, motorLeft)
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
             ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
-            infraValue = int(infraFile.readline())
+            infraValue = int(infraBallFile.readline())
             infraValueDef(infraValue)
         # touch()
 
