@@ -9,10 +9,12 @@ import utilities as util
 infra = ev3.Sensor('in1:i2c8')
 motorRight = ev3.LargeMotor('outA')
 motorLeft = ev3.LargeMotor('outD')
+motorLittle = ev3.MediumMotor('outB')
 # touch = ev3.TouchSensor('in4')
 ultra = ev3.UltrasonicSensor('in3')
 motorRight.connected
 motorLeft.connected
+motorLittle.connected
 infra.connected
 # touch.connected
 ultra.connected
@@ -62,12 +64,12 @@ def two():
 
 def three():
     waitForMotor(motorRight, motorLeft)
-    runTimedR(500, 200)
+    runTimedR(400, 200)
 
 
 def four():
     waitForMotor(motorRight, motorLeft)
-    runTimedR(400, 100)
+    runTimedR(200, 200)
 
 
 def five():
@@ -83,7 +85,7 @@ def five():
             waitForMotor(motorRight, motorLeft)
             runTimed(600, timeForRun)
         elif int(ultraValue) < 401:
-            timeForRun = int(ultraValue) / 300 * 1000
+            timeForRun = int(ultraValue) / 300 * 1000 - 100
             waitForMotor(motorRight, motorLeft)
             runTimed(300, timeForRun)
         if int(ultraValue) < 250:
@@ -91,29 +93,34 @@ def five():
                 infraGoalValue = int(infraGoalFile.readline())
                 motorRight.stop()
                 motorLeft.stop()
-                time.sleep(1)
-                #waitForMotor(motorRight, motorLeft)
                 print (infraGoalValue)
-                infraValueDef(infraGoalValue)
-                time.sleep(2)
+
+                time.sleep(0.1)
+                motorLittle.run_to_abs_pos(position_sp=140)
+                time.sleep(1)
+                infraGoalValueDef(infraGoalValue)
+                time.sleep(2.5)
+
                 waitForMotor(motorRight, motorLeft)
                 runTimed(-300, 1000)
                 timeForRun = (int(ultraValue) / 1050 * 1000) + 1500
+
                 waitForMotor(motorRight, motorLeft)
+                motorLittle.run_to_abs_pos(position_sp=50)
                 runTimed(1050, 1000)
-                time.sleep(3)
+                time.sleep(2)
 
 
 
 
 def six():
     waitForMotor(motorRight, motorLeft)
-    runTimedL(400, 100)
+    runTimedL(200, 200)
 
 
 def seven():
     waitForMotor(motorRight, motorLeft)
-    runTimedL(500, 200)
+    runTimedL(400, 200)
 
 
 def eight():
@@ -125,6 +132,47 @@ def nine():
     waitForMotor(motorRight, motorLeft)
     runTimedL(600, 400)
 
+def zeroG():
+    waitForMotor(motorRight, motorLeft)
+
+
+def oneG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedR(200, 1200)
+
+
+def twoG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedR(200, 9000)
+
+
+def threeG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedR(200, 400)
+
+
+def fourG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedR(200, 200)
+
+def sixG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedL(200, 200)
+
+
+def sevenG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedL(200, 400)
+
+
+def eightG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedL(200, 900)
+
+
+def nineG():
+    waitForMotor(motorRight, motorLeft)
+    runTimedL(200, 1200)
 
 def infraValueDef(i):
     switcher = {
@@ -143,31 +191,42 @@ def infraValueDef(i):
     func = switcher.get(i, lambda: "Invalid")
     return func()
 
+def infraGoalValueDef(i):
+    switcher = {
+        0: zeroG,
+        1: oneG,
+        2: twoG,
+        3: threeG,
+        4: fourG,
+        5: zeroG,
+        6: sixG,
+        7: sevenG,
+        8: eightG,
+        9: nineG,
+    }
 
-"""def touch():
-    with open('/sys/class/lego-sensor/sensor2/value0') as touchFile:
-        touchValue = touchFile.readline()
-        if  int(touchValue) == 1:
-            waitForMotor(motorRight, motorLeft)   
-            runTimed(-500,1000)
-            waitForMotor(motorRight, motorLeft)
-            runTimed(1050,1000)
-"""
+    func = switcher.get(i, lambda: "Invalid")
+    return func()
 
 
 def main():
     i = 0
     with open('/sys/class/lego-sensor/sensor0/mode', 'w') as infraBallFile:
         infraBallFile.write('AC')
+    with open('/sys/class/lego-sensor/sensor1/mode', 'w') as infraGoalFile:
+        infraGoalFile.write('AC')
     print(infra.mode)
     while 1:
         with open('/sys/class/lego-sensor/sensor0/value0') as infraBallFile:
             waitForMotor(motorRight, motorLeft)
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
             ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
+            with open('/sys/class/lego-sensor/sensor0/value0') as mediumMotorPositionFile:
+                mediumMotorPosition = mediumMotorPositionFile.readline()
+                if int(mediumMotorPosition) != 50:
+                    motorLittle.run_to_abs_pos(position_sp=50)
             infraValue = int(infraBallFile.readline())
             infraValueDef(infraValue)
-        # touch()
 
 
 main()
