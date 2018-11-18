@@ -3,6 +3,8 @@
 import ev3dev.ev3 as ev3
 import time
 import utilities as util
+from random import randint
+
 
 # ev3.Sound.speak('I am a robot').wait()
 # ev3.Sound.speak('I will rule the fucking world').wait()
@@ -50,7 +52,11 @@ def waitForMotor(motorRight, motorLeft):
 
 def zero():
     waitForMotor(motorRight, motorLeft)
-
+    #leftOrRight = randint(0, 50)
+    #if leftOrRight < 25:
+    #    runTimedR(200, 800)
+    #else:
+    #    runTimedL(200, 800)
 
 def one():
     waitForMotor(motorRight, motorLeft)
@@ -93,12 +99,27 @@ def five():
                 infraGoalValue = int(infraGoalFile.readline())
                 motorRight.stop()
                 motorLeft.stop()
-                print (infraGoalValue)
 
                 time.sleep(0.1)
-                motorLittle.run_to_abs_pos(position_sp=140)
+                motorLittle.run_to_abs_pos(position_sp=20)
                 time.sleep(1)
+                if infraGoalValue == 0:
+                    while infraGoalValue == 0:
+                        runTimedR(200, 350)
+                        waitForMotor(motorRight, motorLeft)
+                        with open('/sys/class/lego-sensor/sensor1/value0') as infraGoalFile:
+                            infraGoalValue = int(infraGoalFile.readline())
+                            time.sleep(1)
+
                 infraGoalValueDef(infraGoalValue)
+                waitForMotor(motorRight, motorLeft)
+                #with open('/sys/class/lego-sensor/sensor1/value0') as infraGoalFile:
+                #    infraGoalValue = int(infraGoalFile.readline())
+
+                #if infraGoalValue != 5:
+                #    infraGoalValueDef(infraGoalValue)
+
+                print(infraGoalValue)
                 time.sleep(2.5)
 
                 waitForMotor(motorRight, motorLeft)
@@ -106,9 +127,11 @@ def five():
                 timeForRun = (int(ultraValue) / 1050 * 1000) + 1500
 
                 waitForMotor(motorRight, motorLeft)
-                motorLittle.run_to_abs_pos(position_sp=50)
+                motorLittle.run_to_abs_pos(position_sp=110)
                 runTimed(1050, 1000)
-                time.sleep(2)
+                time.sleep(5)
+
+
 
 
 
@@ -136,43 +159,45 @@ def zeroG():
     waitForMotor(motorRight, motorLeft)
 
 
+
+
 def oneG():
     waitForMotor(motorRight, motorLeft)
-    runTimedR(200, 1200)
+    runTimedR(200, 1500)
 
 
 def twoG():
     waitForMotor(motorRight, motorLeft)
-    runTimedR(200, 9000)
+    runTimedR(200, 1150)
 
 
 def threeG():
     waitForMotor(motorRight, motorLeft)
-    runTimedR(200, 400)
+    runTimedR(200, 750)
 
 
 def fourG():
     waitForMotor(motorRight, motorLeft)
-    runTimedR(200, 200)
+    runTimedR(200, 350)
 
 def sixG():
     waitForMotor(motorRight, motorLeft)
-    runTimedL(200, 200)
+    runTimedL(200, 350)
 
 
 def sevenG():
     waitForMotor(motorRight, motorLeft)
-    runTimedL(200, 400)
+    runTimedL(200, 750)
 
 
 def eightG():
     waitForMotor(motorRight, motorLeft)
-    runTimedL(200, 900)
+    runTimedL(200, 1150)
 
 
 def nineG():
     waitForMotor(motorRight, motorLeft)
-    runTimedL(200, 1200)
+    runTimedL(200, 1500)
 
 def infraValueDef(i):
     switcher = {
@@ -215,16 +240,19 @@ def main():
         infraBallFile.write('AC')
     with open('/sys/class/lego-sensor/sensor1/mode', 'w') as infraGoalFile:
         infraGoalFile.write('AC')
-    print(infra.mode)
+    motorLittle.reset()
+    motorLeft.reset()
+    motorRight.reset()
     while 1:
         with open('/sys/class/lego-sensor/sensor0/value0') as infraBallFile:
             waitForMotor(motorRight, motorLeft)
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
             ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
-            with open('/sys/class/lego-sensor/sensor0/value0') as mediumMotorPositionFile:
-                mediumMotorPosition = mediumMotorPositionFile.readline()
-                if int(mediumMotorPosition) != 50:
-                    motorLittle.run_to_abs_pos(position_sp=50)
+            motorLittle.speed_sp=150
+            motorLittle.run_to_abs_pos(position_sp=110)
+
+            #while motorLeft.state == ["running"]:
+            #motorLittle.stop()
             infraValue = int(infraBallFile.readline())
             infraValueDef(infraValue)
 
