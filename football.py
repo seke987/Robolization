@@ -104,12 +104,15 @@ def five():
                 motorLittle.run_to_abs_pos(position_sp=20)
                 time.sleep(1)
                 if infraGoalValue == 0:
-                    while infraGoalValue == 0:
-                        runTimedR(200, 350)
+                    while infraGoalValue == 0 :
+                        runTimedR(250, 350)
                         waitForMotor(motorRight, motorLeft)
-                        with open('/sys/class/lego-sensor/sensor1/value0') as infraGoalFile:
-                            infraGoalValue = int(infraGoalFile.readline())
-                            time.sleep(1)
+                        for i in range(0,1):
+                            with open('/sys/class/lego-sensor/sensor1/value0') as infraGoalFile:
+                                motorLittle.run_to_abs_pos(position_sp=20)
+                                infraGoalValue = int(infraGoalFile.readline())
+                                time.sleep(1)
+
 
                 infraGoalValueDef(infraGoalValue)
                 waitForMotor(motorRight, motorLeft)
@@ -130,6 +133,8 @@ def five():
                 motorLittle.run_to_abs_pos(position_sp=110)
                 runTimed(1050, 1000)
                 time.sleep(5)
+
+
 
 
 
@@ -240,21 +245,24 @@ def main():
         infraBallFile.write('AC')
     with open('/sys/class/lego-sensor/sensor1/mode', 'w') as infraGoalFile:
         infraGoalFile.write('AC')
+    motorLittle.stop()
     motorLittle.reset()
     motorLeft.reset()
     motorRight.reset()
+    motorLittle.speed_sp = 150
+    motorLittle.run_to_abs_pos(position_sp=110)
     while 1:
         with open('/sys/class/lego-sensor/sensor0/value0') as infraBallFile:
             waitForMotor(motorRight, motorLeft)
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
             ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
-            motorLittle.speed_sp=150
-            motorLittle.run_to_abs_pos(position_sp=110)
 
             #while motorLeft.state == ["running"]:
             #motorLittle.stop()
             infraValue = int(infraBallFile.readline())
             infraValueDef(infraValue)
+
+
 
 
 main()
